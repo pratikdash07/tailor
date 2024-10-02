@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pose Measurement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .file-input {
+            margin: 20px 0;
+            text-align: center;
+        }
+        #upload-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #upload-btn:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pose Measurement</h1>
+    <div class="container">
+        <form id="upload-form" enctype="multipart/form-data">
+            <div class="file-input">
+                <input type="file" id="file-input" accept="image/*" required>
+            </div>
+            <button type="submit" id="upload-btn">Upload Image</button>
+        </form>
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const resultsDiv = document.getElementById('results');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Failed to upload image");
+                    }
+
+                    const data = await response.json();
+
+                    // Display the results
+                    resultsDiv.innerHTML = `
+                        <h2>Measurements</h2>
+                        <p>Shoulder Width: ${data.shoulder_width.toFixed(2)} cm</p>
+                        <p>Hip Width: ${data.hip_width.toFixed(2)} cm</p>
+                        <p>Left Arm Length: ${data.left_arm_length.toFixed(2)} cm</p>
+                        <p>Right Arm Length: ${data.right_arm_length.toFixed(2)} cm</p>
+                        <p>Neck Size: ${data.neck_size.toFixed(2)} cm</p>
+                    `;
+                } catch (error) {
+                    resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
